@@ -13,16 +13,30 @@ type User struct {
 type IndexViewModel struct {
 	Title string
 	User  User
+	Posts []Post
+}
+
+type Post struct {
+	User User
+	Body string
 }
 
 func IndexHandle(w http.ResponseWriter, r *http.Request) {
-	user := &User{
-		Username: "kangaroo",
-	}
-
 	v := &IndexViewModel{
 		Title: "home page",
-		User:  *user,
+		User: User{
+			Username: "kangaroo",
+		},
+		Posts: []Post{
+			{
+				User: User{Username: "Alan"},
+				Body: "hello world!",
+			},
+			{
+				User: User{Username: "Alex"},
+				Body: "hello world!",
+			},
+		},
 	}
 
 	tpl, err := template.New("index.html").ParseFiles("templates/index.html")

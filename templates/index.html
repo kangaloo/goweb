@@ -2,13 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    {{if .Title}}
-        <title>{{.Title}}</title>
+    {{ if .Title }}
+        <title>{{ .Title }}</title>
     {{else}}
         <title>Home Page - GoWeb</title>
     {{end}}
 </head>
 <body>
-    <h1>Hello, {{.Username}}!</h1>
+    <h1>Hello, {{ .User.Username }}!</h1>
+
+    {{range .Posts}}
+        <div><p>{{ .User.Username }} says: <b>{{ .Body }}</b></p></div>
+    {{end}}
 </body>
 </html>
