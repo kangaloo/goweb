@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Home Page - GoWeb</title>
+    {{if .Title}}
+        <title>{{.Title}}</title>
+    {{else}}
+        <title>Home Page - GoWeb</title>
+    {{end}}
 </head>
 <body>
     <h1>Hello, {{.Username}}!</h1>
