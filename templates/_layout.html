@@ -9,10 +9,7 @@
     {{end}}
 </head>
 <body>
-    <h1>Hello, {{ .User.Username }}!</h1>
-
-    {{range .Posts}}
-        <div><p>{{ .User.Username }} says: <b>{{ .Body }}</b></p></div>
-    {{end}}
+    <div>Blog: <a href="/">Home</a></div>
+    {{ template "content" . }}
 </body>
 </html>

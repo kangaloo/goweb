@@ -2,8 +2,10 @@ package main
 
 import (
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 )
 
 type User struct {
@@ -12,12 +14,12 @@ type User struct {
 
 type IndexViewModel struct {
 	Title string
-	User  User
+	User
 	Posts []Post
 }
 
 type Post struct {
-	User User
+	User
 	Body string
 }
 
@@ -39,18 +41,52 @@ func IndexHandle(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	tpl, err := template.New("index.html").ParseFiles("templates/index.html")
-	if err != nil {
-		log.Fatalf("parse files error: %v", err)
-	}
-	/*
-		https://stackoverflow.com/questions/49043292/error-template-is-an-incomplete-or-empty-template
-		2019/05/05 15:02:09 exec error template: "welcome" is an incomplete or empty template
-	*/
+	tpl := PopulateTemplates()["index.html"]
 
 	if err := tpl.Execute(w, v); err != nil {
 		log.Fatalf("exec template error: %v", err)
 	}
+}
+
+func PopulateTemplates() map[string]*template.Template {
+	basePath := "templates"
+	res := make(map[string]*template.Template)
+	layout := template.Must(template.ParseFiles(basePath + "/_layout.html"))
+
+	dir, err := os.Open(basePath + "/content")
+	if err != nil {
+		panic("Failed to open template blocks directory: " + err.Error())
+	}
+
+	fis, err := dir.Readdir(-1)
+	if err != nil {
+		panic("Failed to read contents of content directory: " + err.Error())
+	}
+
+	for _, fi := range fis {
+		func() {
+			f, err := os.Open(basePath + "/content/" + fi.Name())
+			if err != nil {
+				panic("Failed to open template '" + err.Error() + "'")
+			}
+			defer func() { _ = f.Close() }()
+
+			content, err := ioutil.ReadAll(f)
+			if err != nil {
+				panic("Failed to read content from file '" + fi.Name() + "'")
+			}
+
+			tpl := template.Must(layout.Clone())
+			_, err = tpl.Parse(string(content))
+			if err != nil {
+				panic("Failed to parse contents of '" + fi.Name() + "' as template")
+			}
+
+			res[fi.Name()] = tpl
+		}()
+	}
+
+	return res
 }
 
 func main() {
