@@ -20,6 +20,11 @@ func IndexHandle(w http.ResponseWriter, r *http.Request) {
 		Username: "kangaroo",
 	}
 
+	v := &IndexViewModel{
+		Title: "home page",
+		User:  *user,
+	}
+
 	tpl, err := template.New("index.html").ParseFiles("templates/index.html")
 	if err != nil {
 		log.Fatalf("parse files error: %v", err)
@@ -29,7 +34,7 @@ func IndexHandle(w http.ResponseWriter, r *http.Request) {
 		2019/05/05 15:02:09 exec error template: "welcome" is an incomplete or empty template
 	*/
 
-	if err := tpl.Execute(w, user); err != nil {
+	if err := tpl.Execute(w, v); err != nil {
 		log.Fatalf("exec template error: %v", err)
 	}
 }
