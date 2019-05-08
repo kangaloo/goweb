@@ -10,7 +10,10 @@ var (
 )
 
 func init() {
-	templates = PopulateTemplates()
+	templates = populateTemplates()
+}
+
+func Startup() {
 	registerRoutes()
 }
 

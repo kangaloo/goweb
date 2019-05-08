@@ -12,6 +12,11 @@ func (v *BaseViewModel) SetTitle(title string) {
 
 type LoginViewModel struct {
 	BaseViewModel
+	Errs []string
+}
+
+func (v *LoginViewModel) AddError(errs ...string) {
+	v.Errs = append(v.Errs, errs...)
 }
 
 type IndexViewModel struct {

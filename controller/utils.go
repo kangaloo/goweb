@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func PopulateTemplates() map[string]*template.Template {
+func populateTemplates() map[string]*template.Template {
 	basePath := "templates"
 	res := make(map[string]*template.Template)
 	layout := template.Must(template.ParseFiles(basePath + "/_layout.html"))
