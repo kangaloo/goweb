@@ -1,6 +1,11 @@
 package model
 
+import "time"
+
 type Post struct {
-	User
-	Body string
+	ID        int `gorm:"primary_key"`
+	UserID    int
+	User      User
+	Body      string     `gorm:"type:varchar(180)"`
+	Timestamp *time.Time `sql:"DEFAULT:current_timestamp"`
 }
