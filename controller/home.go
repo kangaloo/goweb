@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/kangaloo/goweb/vm"
 	"log"
 	"net/http"
@@ -91,4 +93,18 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 
+}
+
+func ProfileHandler(w http.ResponseWriter, r *http.Request) {
+	tplName := "profile.html"
+	vars := mux.Vars(r)
+	pUser := vars["username"]
+	sUser, _ := getSessionUser(r)
+	v, err := vm.GetProfileViewModel(sUser, pUser)
+	if err != nil {
+		msg := fmt.Sprintf("user ( %s ) does not exist", pUser)
+		_, _ = w.Write([]byte(msg))
+		return
+	}
+	_ = templates[tplName].Execute(w, &v)
 }

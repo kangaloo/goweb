@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"html/template"
 	"net/http"
@@ -23,8 +24,11 @@ func Startup() {
 }
 
 func registerRoutes() {
-	http.HandleFunc("/", middleAuth(IndexHandle))
-	http.HandleFunc("/login", LoginHandler)
-	http.HandleFunc("/logout", middleAuth(LogoutHandler))
-	http.HandleFunc("/register", RegisterHandler)
+	r := mux.NewRouter()
+	r.HandleFunc("/", middleAuth(IndexHandle))
+	r.HandleFunc("/login", LoginHandler)
+	r.HandleFunc("/logout", middleAuth(LogoutHandler))
+	r.HandleFunc("/register", RegisterHandler)
+	r.HandleFunc("/user/{username}", middleAuth(ProfileHandler))
+	http.Handle("/", r)
 }
