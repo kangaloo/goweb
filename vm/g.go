@@ -1,13 +1,21 @@
 package vm
 
-import "github.com/kangaloo/goweb/model"
+import (
+	"github.com/kangaloo/goweb/model"
+	"log"
+)
 
 type BaseViewModel struct {
-	Title string
+	Title       string
+	CurrentUser string
 }
 
 func (v *BaseViewModel) SetTitle(title string) {
 	v.Title = title
+}
+
+func (v *BaseViewModel) SetCurrentUser(username string) {
+	v.CurrentUser = username
 }
 
 type LoginViewModel struct {
@@ -21,23 +29,18 @@ func (v *LoginViewModel) AddError(errs ...string) {
 
 type IndexViewModel struct {
 	BaseViewModel
-	model.User
 	Posts []model.Post
 }
 
-func GetVM() *IndexViewModel {
-
-	u1 := model.User{Username: "Alan"}
-	u2 := model.User{Username: "Alex"}
-
-	posts := []model.Post{
-		{User: u1, Body: "Beautiful day in Portland!"},
-		{User: u2, Body: "The Avengers movie was so cool!"},
+func GetVM(username string) *IndexViewModel {
+	user, err := model.GetUserByUsername(username)
+	if err != nil {
+		log.Println(err.Error())
+		return &IndexViewModel{BaseViewModel{Title: "Home Page"}, nil}
 	}
 
-	return &IndexViewModel{
-		BaseViewModel{Title: "home page"},
-		model.User{Username: "kangaroo"},
-		posts,
-	}
+	posts, _ := model.GetPostsByUserID(user.ID)
+	v := &IndexViewModel{BaseViewModel{Title: "Home Page"}, *posts}
+	v.SetCurrentUser(username)
+	return v
 }
