@@ -108,3 +108,28 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	_ = templates[tplName].Execute(w, &v)
 }
+
+func ProfileEditHandler(w http.ResponseWriter, r *http.Request) {
+	tplName := "profile_edit.html"
+	username, _ := getSessionUser(r)
+	v := vm.GetProfileEditViewModel(username)
+
+	if r.Method == http.MethodGet {
+		if err := templates[tplName].Execute(w, v); err != nil {
+			log.Println(err)
+			return
+		}
+	}
+
+	if r.Method == http.MethodPost {
+		_ = r.ParseForm()
+		aboutMe := r.Form.Get("aboutme")
+		log.Println("get about me from user form post: ", aboutMe)
+		if err := vm.UpdateAboutMe(username, aboutMe); err != nil {
+			log.Println("update about me error: ", err)
+			_, _ = w.Write([]byte("Error update about me"))
+			return
+		}
+		http.Redirect(w, r, "", http.StatusSeeOther)
+	}
+}

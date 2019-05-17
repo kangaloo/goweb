@@ -30,5 +30,6 @@ func registerRoutes() {
 	r.HandleFunc("/logout", middleAuth(LogoutHandler))
 	r.HandleFunc("/register", RegisterHandler)
 	r.HandleFunc("/user/{username}", middleAuth(ProfileHandler))
+	r.HandleFunc("/profile_edit", middleAuth(ProfileEditHandler))
 	http.Handle("/", r)
 }
