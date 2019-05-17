@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func IndexHandle(w http.ResponseWriter, r *http.Request) {
+func indexHandle(w http.ResponseWriter, r *http.Request) {
 	user, _ := getSessionUser(r)
 	log.Println(user)
 	v := vm.GetVM(user)
@@ -19,7 +19,7 @@ func IndexHandle(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+func loginHandler(w http.ResponseWriter, r *http.Request) {
 
 	tplName := "login.html"
 
@@ -54,12 +54,12 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func logoutHandler(w http.ResponseWriter, r *http.Request) {
 	_ = clearSession(w, r)
 	http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 }
 
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+func registerHandler(w http.ResponseWriter, r *http.Request) {
 	tplName := "register.html"
 	v := vm.GetRegisterViewModel()
 
@@ -95,7 +95,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func ProfileHandler(w http.ResponseWriter, r *http.Request) {
+func profileHandler(w http.ResponseWriter, r *http.Request) {
 	tplName := "profile.html"
 	vars := mux.Vars(r)
 	pUser := vars["username"]
@@ -109,7 +109,7 @@ func ProfileHandler(w http.ResponseWriter, r *http.Request) {
 	_ = templates[tplName].Execute(w, &v)
 }
 
-func ProfileEditHandler(w http.ResponseWriter, r *http.Request) {
+func profileEditHandler(w http.ResponseWriter, r *http.Request) {
 	tplName := "profile_edit.html"
 	username, _ := getSessionUser(r)
 	v := vm.GetProfileEditViewModel(username)
@@ -132,4 +132,32 @@ func ProfileEditHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		http.Redirect(w, r, "", http.StatusSeeOther)
 	}
+}
+
+func followHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	pUser := vars["username"]
+	sUser, _ := getSessionUser(r)
+
+	err := vm.Follow(sUser, pUser)
+	if err != nil {
+		log.Println("Follow error:", err)
+		_, _ = w.Write([]byte("Error in Follow"))
+		return
+	}
+	http.Redirect(w, r, fmt.Sprintf("/user/%s", pUser), http.StatusSeeOther)
+}
+
+func unFollowHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	pUser := vars["username"]
+	sUser, _ := getSessionUser(r)
+
+	err := vm.UnFollow(sUser, pUser)
+	if err != nil {
+		log.Println("UnFollow error:", err)
+		_, _ = w.Write([]byte("Error in UnFollow"))
+		return
+	}
+	http.Redirect(w, r, fmt.Sprintf("/user/%s", pUser), http.StatusSeeOther)
 }

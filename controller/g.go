@@ -25,11 +25,13 @@ func Startup() {
 
 func registerRoutes() {
 	r := mux.NewRouter()
-	r.HandleFunc("/", middleAuth(IndexHandle))
-	r.HandleFunc("/login", LoginHandler)
-	r.HandleFunc("/logout", middleAuth(LogoutHandler))
-	r.HandleFunc("/register", RegisterHandler)
-	r.HandleFunc("/user/{username}", middleAuth(ProfileHandler))
-	r.HandleFunc("/profile_edit", middleAuth(ProfileEditHandler))
+	r.HandleFunc("/", middleAuth(indexHandle))
+	r.HandleFunc("/login", loginHandler)
+	r.HandleFunc("/logout", middleAuth(logoutHandler))
+	r.HandleFunc("/register", registerHandler)
+	r.HandleFunc("/user/{username}", middleAuth(profileHandler))
+	r.HandleFunc("/follow/{username}", middleAuth(followHandler))
+	r.HandleFunc("/unfollow/{username}", middleAuth(unFollowHandler))
+	r.HandleFunc("/profile_edit", middleAuth(profileEditHandler))
 	http.Handle("/", r)
 }
