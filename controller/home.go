@@ -11,11 +11,31 @@ import (
 func indexHandle(w http.ResponseWriter, r *http.Request) {
 	user, _ := getSessionUser(r)
 	log.Println(user)
-	v := vm.GetVM(user)
 	tpl := templates["index.html"]
+	page := getPage(r)
 
-	if err := tpl.Execute(w, v); err != nil {
-		log.Fatalf("exec template error: %v", err)
+	if r.Method == http.MethodGet {
+		flash := getFlash(w, r)
+		v := vm.GetVM(user, flash, page, pageLimit)
+		_ = tpl.Execute(w, v)
+	}
+
+	if r.Method == http.MethodPost {
+		_ = r.ParseForm()
+		body := r.Form.Get("body")
+		errMessage := checkLen("Post", body, 1, 180)
+		if errMessage != "" {
+			setFlash(w, r, errMessage)
+		} else {
+			err := vm.CreatePost(user, body)
+			if err != nil {
+				log.Println("add Post error:", err)
+				_, _ = w.Write([]byte("Error insert Post in database"))
+				return
+			}
+		}
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }
 
@@ -100,7 +120,8 @@ func profileHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	pUser := vars["username"]
 	sUser, _ := getSessionUser(r)
-	v, err := vm.GetProfileViewModel(sUser, pUser)
+	page := getPage(r)
+	v, err := vm.GetProfileViewModel(sUser, pUser, page, pageLimit)
 	if err != nil {
 		msg := fmt.Sprintf("user ( %s ) does not exist", pUser)
 		_, _ = w.Write([]byte(msg))
@@ -160,4 +181,12 @@ func unFollowHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, fmt.Sprintf("/user/%s", pUser), http.StatusSeeOther)
+}
+
+func exploreHandler(w http.ResponseWriter, r *http.Request) {
+	tplName := "explore.html"
+	user, _ := getSessionUser(r)
+	page := getPage(r)
+	v := vm.GetExploreViewModel(user, page, pageLimit)
+	_ = templates[tplName].Execute(w, &v)
 }

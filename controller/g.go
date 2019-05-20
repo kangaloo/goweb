@@ -10,13 +10,17 @@ import (
 var (
 	templates   map[string]*template.Template
 	sessionName string
+	flashName   string
 	store       *sessions.CookieStore
+	pageLimit   int
 )
 
 func init() {
 	templates = populateTemplates()
 	sessionName = "go-web"
+	flashName = "go-web-flash"
 	store = sessions.NewCookieStore([]byte("go-web-secret"))
+	pageLimit = 5
 }
 
 func Startup() {
@@ -33,5 +37,6 @@ func registerRoutes() {
 	r.HandleFunc("/follow/{username}", middleAuth(followHandler))
 	r.HandleFunc("/unfollow/{username}", middleAuth(unFollowHandler))
 	r.HandleFunc("/profile_edit", middleAuth(profileEditHandler))
+	r.HandleFunc("/explore", middleAuth(exploreHandler))
 	http.Handle("/", r)
 }

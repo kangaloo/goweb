@@ -1,10 +1,5 @@
 package vm
 
-import (
-	"github.com/kangaloo/goweb/model"
-	"log"
-)
-
 type BaseViewModel struct {
 	Title       string
 	CurrentUser string
@@ -27,20 +22,26 @@ func (v *LoginViewModel) AddError(errs ...string) {
 	v.Errs = append(v.Errs, errs...)
 }
 
-type IndexViewModel struct {
-	BaseViewModel
-	Posts []model.Post
+type BasePageViewModel struct {
+	PrevPage    int
+	NextPage    int
+	Total       int
+	CurrentPage int
+	Limit       int
 }
 
-func GetVM(username string) *IndexViewModel {
-	user, err := model.GetUserByUsername(username)
-	if err != nil {
-		log.Println(err.Error())
-		return &IndexViewModel{BaseViewModel{Title: "Home Page"}, nil}
+func (v *BasePageViewModel) SetPrevAndNextPage() {
+	if v.CurrentPage > 1 {
+		v.PrevPage = v.CurrentPage - 1
 	}
+	if (v.Total-1)/v.Limit >= v.CurrentPage {
+		v.NextPage = v.CurrentPage + 1
+	}
+}
 
-	posts, _ := model.GetPostsByUserID(user.ID)
-	v := &IndexViewModel{BaseViewModel{Title: "Home Page"}, *posts}
-	v.SetCurrentUser(username)
-	return v
+func (v *BasePageViewModel) SetBasePageViewModel(total, page, limit int) {
+	v.Total = total
+	v.CurrentPage = page
+	v.Limit = limit
+	v.SetPrevAndNextPage()
 }

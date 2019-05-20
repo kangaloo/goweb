@@ -142,3 +142,21 @@ func UpdateAboutMe(username, text string) error {
 	contents := map[string]interface{}{"about_me": text}
 	return UpdateUserByUsername(username, contents)
 }
+
+func (u *User) FollowingPostsByPageAndLimit(page, limit int) (*[]Post, int, error) {
+	var (
+		total  int
+		posts  []Post
+		offset = (page - 1) * limit
+	)
+
+	ids := u.FollowingIDs()
+	err := db.Preload("User").Order("timestamp desc").Where("user_id in (?)", ids).
+		Offset(offset).Limit(limit).Find(&posts).Error
+	if err != nil {
+		return nil, total, err
+	}
+
+	db.Model(&Post{}).Where("user_id in (?)", ids).Count(&total)
+	return &posts, total, nil
+}

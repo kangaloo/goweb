@@ -4,6 +4,7 @@ import "github.com/kangaloo/goweb/model"
 
 type ProfileViewModel struct {
 	BaseViewModel
+	BasePageViewModel
 	Posts          []model.Post
 	Editable       bool
 	IsFollow       bool
@@ -12,7 +13,7 @@ type ProfileViewModel struct {
 	ProfileUser    model.User
 }
 
-func GetProfileViewModel(sUser, pUser string) (*ProfileViewModel, error) {
+func GetProfileViewModel(sUser, pUser string, page, limit int) (*ProfileViewModel, error) {
 	v := &ProfileViewModel{}
 	v.SetTitle("Profile")
 	u, err := model.GetUserByUsername(pUser)
@@ -20,14 +21,14 @@ func GetProfileViewModel(sUser, pUser string) (*ProfileViewModel, error) {
 		return v, err
 	}
 
-	posts, _ := model.GetPostsByUserID(u.ID)
+	posts, total, _ := model.GetPostsByUserIDPageAndLimit(u.ID, page, limit)
 	v.ProfileUser = *u
 	v.Editable = sUser == pUser
-
 	if !v.Editable {
 		v.IsFollow = u.IsFollowedByUser(sUser)
 	}
 
+	v.SetBasePageViewModel(total, page, limit)
 	v.FollowersCount = u.FollowersCount()
 	v.FollowingCount = u.FollowingCount()
 	v.Posts = *posts
