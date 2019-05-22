@@ -1,9 +1,11 @@
 package controller
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/kangaloo/goweb/vm"
+	"html/template"
 	"log"
 	"net/http"
 )
@@ -189,4 +191,77 @@ func exploreHandler(w http.ResponseWriter, r *http.Request) {
 	page := getPage(r)
 	v := vm.GetExploreViewModel(user, page, pageLimit)
 	_ = templates[tplName].Execute(w, &v)
+}
+
+func resetPasswordRequestHandler(w http.ResponseWriter, r *http.Request) {
+	tplName := "reset_password_request.html"
+	v := vm.GetResetPasswordRequestViewModel()
+	if r.Method == http.MethodGet {
+		_ = templates[tplName].Execute(w, v)
+		return
+	}
+
+	if r.Method == http.MethodPost {
+		_ = r.ParseForm()
+		email := r.Form.Get("email")
+		log.Println("get email from form: ", email)
+
+		errs := checkResetPasswordRequest(email)
+		v.AddError(errs...)
+
+		if len(v.Errs) > 0 {
+			_ = templates[tplName].Execute(w, &v)
+		} else {
+			log.Println("send email to: ", email)
+			vEmail := vm.GetEmailViewModel(email)
+			tpl, _ := template.ParseFiles("templates/email.html")
+			var contentBytes bytes.Buffer
+			err := tpl.Execute(&contentBytes, vEmail)
+			if err != nil {
+				log.Println("Get Parse Template:", err)
+				_, _ = w.Write([]byte("Error send email"))
+				return
+			}
+
+			go sendEmail(email, "Reset Password", contentBytes.String())
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+		}
+	}
+}
+
+func resetPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	token := vars["token"]
+	username, err := vm.CheckToken(token)
+	if err != nil {
+		_, _ = w.Write([]byte("The token is no longer valid, please go to the login page."))
+	}
+
+	tplName := "reset_password.html"
+	v := vm.GetResetPasswordViewModel(token)
+
+	if r.Method == http.MethodGet {
+		_ = templates[tplName].Execute(w, v)
+	}
+
+	if r.Method == http.MethodPost {
+		log.Println("Reset password for ", username)
+		_ = r.ParseForm()
+		pwd1 := r.Form.Get("pwd1")
+		pwd2 := r.Form.Get("pwd2")
+
+		errs := checkResetPassword(pwd1, pwd2)
+		v.AddError(errs...)
+
+		if len(v.Errs) > 0 {
+			_ = templates[tplName].Execute(w, &v)
+		} else {
+			if err := vm.ResetUserPassword(username, pwd1); err != nil {
+				log.Println("reset User password error:", err)
+				_, _ = w.Write([]byte("Error update user password in database"))
+				return
+			}
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
+		}
+	}
 }

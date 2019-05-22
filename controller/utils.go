@@ -1,14 +1,17 @@
 package controller
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/go-gomail/gomail"
+	"github.com/kangaloo/goweb/config"
 	"github.com/kangaloo/goweb/vm"
 	"html/template"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
-	"regexp"
 	"strconv"
 )
 
@@ -118,9 +121,9 @@ func checkUserExist(username string) string {
 }
 
 func checkEmail(email string) string {
-	if m, _ := regexp.MatchString(`^([\w._]{2,10})@(\w{1,}).([a-z]{2,4})$`, email); !m {
-		return fmt.Sprintf("Email field not a valid email")
-	}
+	//if m, _ := regexp.MatchString(`^([\w._]{2,10})@(\w{1,}).([a-z]{2,4})$`, email); !m {
+	//	return fmt.Sprintf("Email field not a valid email")
+	//}
 	return ""
 }
 
@@ -182,4 +185,50 @@ func getPage(r *http.Request) int {
 		return 1
 	}
 	return page
+}
+
+func sendEmail(target, subject, content string) {
+	server, port, user, pwd := config.GetSMTPConfig()
+	d := gomail.NewPlainDialer(server, port, user, pwd)
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", user)
+	m.SetHeader("To", target)
+	m.SetAddressHeader("Cc", user, "admin")
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/html", content)
+
+	if err := d.DialAndSend(m); err != nil {
+		log.Println("sendEmail: ", err)
+		return
+	}
+
+	log.Printf("sendMail: send mail to %s successfully\n", target)
+}
+
+func checkResetPasswordRequest(email string) []string {
+	var errs []string
+	if errCheck := checkEmail(email); len(errCheck) > 0 {
+		errs = append(errs, errCheck)
+	}
+	if errCheck := checkEmailExist(email); len(errCheck) > 0 {
+		errs = append(errs, errCheck)
+	}
+	return errs
+}
+
+func checkEmailExist(email string) string {
+	if !vm.CheckEmailExist(email) {
+		return fmt.Sprintf("Email does not register yet.Please Check email.")
+	}
+	return ""
+}
+
+func checkResetPassword(pwd1, pwd2 string) []string {
+	var errs []string
+	if pwd1 != pwd2 {
+		errs = append(errs, "2 password does not match")
+	}
+	return errs
 }

@@ -1,0 +1,14 @@
+mysql:
+  charset: utf8
+  db: goweb
+  host: 127.0.0.1
+  port: 3306
+  password: 123456
+  user: root
+mail:
+  smtp: smtp.126.com
+  smtp-port: 25
+  user: goweb_li@126.com
+  password: liang6462233967
+server:
+  url: http://127.0.0.1:8080

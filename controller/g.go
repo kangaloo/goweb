@@ -38,5 +38,7 @@ func registerRoutes() {
 	r.HandleFunc("/unfollow/{username}", middleAuth(unFollowHandler))
 	r.HandleFunc("/profile_edit", middleAuth(profileEditHandler))
 	r.HandleFunc("/explore", middleAuth(exploreHandler))
+	r.HandleFunc("/reset_password_request", resetPasswordRequestHandler)
+	r.HandleFunc("/reset_password/{token}", resetPasswordHandler)
 	http.Handle("/", r)
 }
