@@ -10,7 +10,8 @@ import (
 
 func main() {
 	db := model.ConnectToDB()
-	defer func() { _ = db.Close() }()
+	//defer func() { _ = db.Close() }()
+	defer db.Close()
 	model.SetDB(db)
 	controller.Startup()
 	log.Fatal(http.ListenAndServe(":8080", context.ClearHandler(http.DefaultServeMux)))
