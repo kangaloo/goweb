@@ -4,6 +4,7 @@ import (
 	"github.com/kangaloo/goweb/model"
 	"log"
 	"net/http"
+	"time"
 )
 
 func middleAuth(next http.HandlerFunc) http.HandlerFunc {
@@ -22,5 +23,13 @@ func middleAuth(next http.HandlerFunc) http.HandlerFunc {
 		} else {
 			next.ServeHTTP(writer, request)
 		}
+	}
+}
+
+func middleLog(next http.HandlerFunc) http.HandlerFunc {
+	return func(writer http.ResponseWriter, request *http.Request) {
+		now := time.Now()
+		next(writer, request)
+		log.Printf("%s %s %s done in %v", request.RemoteAddr, request.Method, request.URL.Path, time.Since(now))
 	}
 }
