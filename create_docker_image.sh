@@ -5,4 +5,4 @@ cd ${currentDir}
 
 CGO_ENABLE=0 GOOS=linux go build
 
-docker build -t goweb:v1.1 .
+docker build -t goweb:v1.3 .
