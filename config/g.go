@@ -25,8 +25,7 @@ func GetMysqlDSN() string {
 	port := viper.GetString("mysql.port")
 	db := viper.GetString("mysql.db")
 	charset := viper.GetString("mysql.charset")
-	//return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=true&loc=Local", usr, pwd, host, port, db, charset)
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=True&loc=Loacl", usr, pwd, host, port, db, charset)
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s&parseTime=true&loc=Local", usr, pwd, host, port, db, charset)
 }
 
 func GetSMTPConfig() (server string, port int, user, pwd string) {
