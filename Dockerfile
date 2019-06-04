@@ -1,8 +1,7 @@
-FROM ubuntu:latest
+FROM golang:latest
 
-WORKDIR /root/GoProjects/goweb/
-COPY goweb /root/GoProjects/goweb/
-RUN mkdir /root/GoProjects/goweb/conf && mkdir /root/GoProjects/goweb/templates
-COPY conf /root/GoProjects/goweb/conf/
-COPY templates /root/GoProjects/goweb/templates
-ENTRYPOINT ["/root/GoProjects/goweb/goweb"]
+WORKDIR /root
+RUN git clone https://github.com/kangaloo/goweb.git
+RUN cd /root/goweb && go build
+
+ENTRYPOINT ["/root/goweb/goweb"]
