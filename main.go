@@ -14,5 +14,5 @@ func main() {
 	defer db.Close()
 	model.SetDB(db)
 	controller.Startup()
-	log.Fatal(http.ListenAndServeTLS(":443", "/root/ca/2308163_www.darkblog.cn.pem", "/root/ca/2308163_www.darkblog.cn.key", context.ClearHandler(http.DefaultServeMux)))
+	log.Fatal(http.ListenAndServe(":8080", context.ClearHandler(http.DefaultServeMux)))
 }
