@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"html/template"
 	"net/http"
 )
@@ -29,6 +30,7 @@ func Startup() {
 
 func registerRoutes() {
 	r := mux.NewRouter()
+	r.HandleFunc("/metrics", promhttp.Handler().ServeHTTP)
 	r.HandleFunc("/", middleLog(middleAuth(indexHandle)))
 	r.HandleFunc("/login", middleLog(loginHandler))
 	r.HandleFunc("/logout", middleLog(middleAuth(logoutHandler)))
